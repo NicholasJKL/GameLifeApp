@@ -13,7 +13,11 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Image Name="MyImage" RenderOptions.BitmapScalingMode="NearestNeighbor" RenderOptions.EdgeMode="Aliased" />
+        <Image Name="MyImage" 
+               RenderOptions.BitmapScalingMode="NearestNeighbor" 
+               RenderOptions.EdgeMode="Aliased"
+               MouseMove="GetMousePos"
+               MouseLeftButtonDown="SetAliveClick"/>
         <WrapPanel Grid.Row="1" HorizontalAlignment="Center">
             <Button Name="TimerManagerButton" Content="Запустить" Margin="0 0 8 4" Padding="4" Click="TimerManagerButton_Click"/>
             <Button Name="RandomConfigurationButton" Content="Рандом" Margin="0 0 8 4" Padding="4" Click="RandomConfigurationButton_Click"/>

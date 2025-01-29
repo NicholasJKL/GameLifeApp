@@ -57,9 +57,9 @@
 			_screen[y + 1, x + 1].IsAlive = true;
 		}
 
-		public bool GetStatus(int x, int y)
+		public Tile GetTile(int x, int y) 
 		{
-			return _screen[y + 1, x + 1].IsAlive;
+			return _screen[y + 1, x + 1];
 		}
 
 		public void Show()

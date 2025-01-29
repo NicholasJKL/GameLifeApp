@@ -11,7 +11,7 @@ using System.Windows.Shapes;
 using static System.Net.Mime.MediaTypeNames;
 using GameLifeApp.Entities;
 using System.Windows.Threading;
-using System.Diagnostics.Metrics;
+using System.Diagnostics;
 
 
 namespace GameLifeApp
@@ -26,12 +26,13 @@ namespace GameLifeApp
 		int _width = 200;
 		int _height = 100;
 		int _speed = 250;
+		(int, int)? _currentTile;
 
 
 		public MainWindow()
 		{
 			InitializeComponent();
-
+			
 			_writeableBitmap = new WriteableBitmap(_width, _height, 96, 96, PixelFormats.Bgra32, null);
 			_screen = new Screen(_width, _height);
 			_timer = new DispatcherTimer();
@@ -69,9 +70,18 @@ namespace GameLifeApp
 					byte g = 0;
 					byte r = 0;
 
-					if (_screen.GetStatus(x, y))
+					if (_screen.GetTile(x, y).IsAlive)
 					{
 						g = 255;
+					}
+
+					if (_currentTile is not null &&
+						_currentTile.Value.Item1 == x &&
+						_currentTile.Value.Item2 == y)
+					{
+
+						g = 255;
+						r = 255;
 					}
 
 					pixels[index] = b;
@@ -153,5 +163,28 @@ namespace GameLifeApp
 			SpeedTryParse(SpeedBox, new TextChangedEventArgs(TextBox.TextChangedEvent, UndoAction.None));
 		}
 
+		void GetMousePos(object sender, MouseEventArgs e) 
+		{
+			var mousePos = e.GetPosition(MyImage);
+
+			_currentTile = ((int)(mousePos.X / (MyImage.ActualHeight / _height)), (int)(mousePos.Y / (MyImage.ActualWidth / _width)));
+
+			byte[] pixels = CreatePixelData();
+
+			UpdateBitmap(pixels);
+		}
+
+
+
+		void SetAliveClick(object sender, MouseEventArgs e) 
+		{
+			var mousePos = e.GetPosition(MyImage);
+
+			_screen.SetAlive((int)(mousePos.X/(MyImage.ActualHeight/_height)), (int)(mousePos.Y/ (MyImage.ActualWidth / _width)));
+
+			byte[] pixels = CreatePixelData();
+
+			UpdateBitmap(pixels);
+		}
 	}
 }
