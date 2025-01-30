@@ -2,11 +2,15 @@
 {
 	public class Screen
 	{
-		readonly Tile[,] _screen;
+		Tile[,] _screen;
+		int _width, _height;
 
 		public Screen(int width, int height)
 		{
 			_screen = new Tile[height + 2, width + 2];
+
+			_width = width;
+			_height = height;
 
 			for (int x = 1; x < height + 1; x++)
 			{
@@ -57,9 +61,25 @@
 			_screen[y + 1, x + 1].IsAlive = true;
 		}
 
-		public Tile GetTile(int x, int y) 
+		public void UnsetAlive(int x, int y)
+		{
+			_screen[y + 1, x + 1].IsAlive = false;
+		}
+
+		public Tile GetTile(int x, int y)
 		{
 			return _screen[y + 1, x + 1];
+		}
+
+		public void Clear()
+		{
+			for (int x = 1; x < _height + 1; x++)
+			{
+				for (int y = 1; y < _width + 1; y++)
+				{
+					_screen[x, y].IsAlive = false;
+				}
+			}
 		}
 
 		public void Show()
@@ -67,9 +87,9 @@
 			var columns = _screen.GetLength(0);
 			var rows = _screen.GetLength(1);
 
-			for (int x = 1; x < columns - 1; x++)
+			for (int x = 1; x < _height; x++) //TEST
 			{
-				for (int y = 1; y < rows - 1; y++)
+				for (int y = 1; y < _width; y++) //TEST
 				{
 					if (_screen[x, y].IsAlive)
 						Console.Write('0');

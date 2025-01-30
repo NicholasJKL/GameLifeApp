@@ -16,12 +16,14 @@
         <Image Name="MyImage" 
                RenderOptions.BitmapScalingMode="NearestNeighbor" 
                RenderOptions.EdgeMode="Aliased"
-               MouseMove="GetMousePos"
-               MouseLeftButtonDown="SetAliveClick"/>
+               MouseMove="SetMarker"
+               MouseLeftButtonDown="SetAliveClick"
+               MouseLeave="UnsetMarker"
+               MouseRightButtonDown="UnsetAliveClick"/>
         <WrapPanel Grid.Row="1" HorizontalAlignment="Center">
             <Button Name="TimerManagerButton" Content="Запустить" Margin="0 0 8 4" Padding="4" Click="TimerManagerButton_Click"/>
             <Button Name="RandomConfigurationButton" Content="Рандом" Margin="0 0 8 4" Padding="4" Click="RandomConfigurationButton_Click"/>
-            <TextBlock Margin="0 0 8 4">Скорость (мс):</TextBlock>
+            <TextBlock Margin="0 0 8 4">Задержка обновления (мс):</TextBlock>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />

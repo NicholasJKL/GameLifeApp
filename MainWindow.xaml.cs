@@ -1,14 +1,8 @@
-﻿using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using static System.Net.Mime.MediaTypeNames;
 using GameLifeApp.Entities;
 using System.Windows.Threading;
 using System.Diagnostics;
@@ -32,13 +26,13 @@ namespace GameLifeApp
 		public MainWindow()
 		{
 			InitializeComponent();
-			
+
 			_writeableBitmap = new WriteableBitmap(_width, _height, 96, 96, PixelFormats.Bgra32, null);
 			_screen = new Screen(_width, _height);
 			_timer = new DispatcherTimer();
 
 			_timer.Interval = TimeSpan.FromMilliseconds(_speed);
-			_timer.Tick += Update;
+			_timer.Tick += UpdateGame;
 
 			MyImage.Source = _writeableBitmap;
 
@@ -47,10 +41,17 @@ namespace GameLifeApp
 			UpdateBitmap(pixels);
 		}
 
-		void Update(object? sender = null, EventArgs? e = null)
+		void UpdateGame(object? sender = null, EventArgs? e = null)
 		{
 			_screen.Update();
 
+			byte[] pixels = CreatePixelData();
+
+			UpdateBitmap(pixels);
+		}
+
+		void UpdateImage(object? sender = null, EventArgs? e = null)
+		{
 			byte[] pixels = CreatePixelData();
 
 			UpdateBitmap(pixels);
@@ -69,11 +70,7 @@ namespace GameLifeApp
 					byte b = 0;
 					byte g = 0;
 					byte r = 0;
-
-					if (_screen.GetTile(x, y).IsAlive)
-					{
-						g = 255;
-					}
+					byte a = 255;
 
 					if (_currentTile is not null &&
 						_currentTile.Value.Item1 == x &&
@@ -84,10 +81,15 @@ namespace GameLifeApp
 						r = 255;
 					}
 
+					else if (_screen.GetTile(x, y).IsAlive)
+					{
+						g = 255;
+					}
+
 					pixels[index] = b;
 					pixels[index + 1] = g;
 					pixels[index + 2] = r;
-					pixels[index + 3] = 255;
+					pixels[index + 3] = a;
 				}
 			}
 			return pixels;
@@ -116,9 +118,11 @@ namespace GameLifeApp
 			_timerPause = !_timerPause;
 		}
 
-		void RandomConfigurationButton_Click(object sender, RoutedEventArgs e) 
+		void RandomConfigurationButton_Click(object sender, RoutedEventArgs e)
 		{
-			Random rnd = new Random();
+			var rnd = new Random();
+
+			_screen.Clear();
 
 			int count = rnd.Next(3, _width * _height + 1);
 
@@ -130,13 +134,13 @@ namespace GameLifeApp
 				_screen.SetAlive(x, y);
 			}
 
-			Update();
+			UpdateImage();
 		}
 
-		void SpeedTryParse(object sender, EventArgs e) 
+		void SpeedTryParse(object sender, EventArgs e)
 		{
 
-			if (int.TryParse(SpeedBox.Text, out int value) && value >= 100) 
+			if (int.TryParse(SpeedBox.Text, out int value) && value >= 100)
 			{
 				_speed = value;
 
@@ -145,46 +149,56 @@ namespace GameLifeApp
 					_timer.Interval = TimeSpan.FromMilliseconds(_speed);
 				}
 			}
-			else 
+			else
 			{
 				SpeedBox.Text = Convert.ToString(_speed);
 			}
 		}
 
-		void IncrementSpeedButton_Click(object sender, RoutedEventArgs e) 
+		void IncrementSpeedButton_Click(object sender, RoutedEventArgs e)
 		{
 			SpeedBox.Text = Convert.ToString(_speed + 10);
 			SpeedTryParse(SpeedBox, new TextChangedEventArgs(TextBox.TextChangedEvent, UndoAction.None));
 		}
 
-		void DecrementSpeedButton_Click(object sender, RoutedEventArgs e) 
+		void DecrementSpeedButton_Click(object sender, RoutedEventArgs e)
 		{
 			SpeedBox.Text = Convert.ToString(_speed - 10);
 			SpeedTryParse(SpeedBox, new TextChangedEventArgs(TextBox.TextChangedEvent, UndoAction.None));
 		}
 
-		void GetMousePos(object sender, MouseEventArgs e) 
+		void SetMarker(object sender, MouseEventArgs e)
 		{
 			var mousePos = e.GetPosition(MyImage);
-
+			
 			_currentTile = ((int)(mousePos.X / (MyImage.ActualHeight / _height)), (int)(mousePos.Y / (MyImage.ActualWidth / _width)));
 
-			byte[] pixels = CreatePixelData();
-
-			UpdateBitmap(pixels);
+			UpdateImage();
 		}
 
-
-
-		void SetAliveClick(object sender, MouseEventArgs e) 
+		void SetAliveClick(object sender, MouseEventArgs e)
 		{
 			var mousePos = e.GetPosition(MyImage);
 
-			_screen.SetAlive((int)(mousePos.X/(MyImage.ActualHeight/_height)), (int)(mousePos.Y/ (MyImage.ActualWidth / _width)));
+			_screen.SetAlive((int)(mousePos.X / (MyImage.ActualHeight / _height)), (int)(mousePos.Y / (MyImage.ActualWidth / _width)));
 
-			byte[] pixels = CreatePixelData();
+			UpdateImage();
+		}
 
-			UpdateBitmap(pixels);
+		void UnsetMarker(object sender, MouseEventArgs e)
+		{
+			_currentTile = null;
+
+			UpdateImage();
+		}
+
+		void UnsetAliveClick(object sender, MouseEventArgs e)
+		{
+			var mousePos = e.GetPosition(MyImage);
+
+			_screen.UnsetAlive((int)(mousePos.X / (MyImage.ActualHeight / _height)), (int)(mousePos.Y / (MyImage.ActualWidth / _width)));
+
+			UpdateImage();
 		}
 	}
 }
